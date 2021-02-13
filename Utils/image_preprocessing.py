@@ -9,6 +9,8 @@ import glob
 import scipy.io as io
 import scipy.ndimage as nd
 import matplotlib.pyplot as plt
+from mpl_toolkits.mplot3d import Axes3D
+
 
 
 
@@ -42,7 +44,7 @@ def plotAndSaveVoxel(file_path, voxel):
     """
     fig = plt.figure()
     ax = fig.gca(projection='3d')
-    ax.set_aspect('equal')
+    ax.set_aspect('auto')
     ax.voxels(voxel, edgecolor="red")
     # plt.show()
     plt.savefig(file_path)

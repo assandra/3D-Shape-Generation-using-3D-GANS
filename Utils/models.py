@@ -13,7 +13,7 @@ from keras.layers.normalization import BatchNormalization
 from keras.models import Model
 from keras.layers.advanced_activations import LeakyReLU
 
-def build_Generator():
+def build_generator():
     '''
     Build the Generator Model of the 3D-GAN.
     Returns: Generator Network
@@ -47,7 +47,7 @@ def build_Generator():
     gen_model = Model(inputs=[input_layer], outputs=[a])
     return gen_model
     
-def build_Discriminator():
+def build_discriminator():
     '''
     Build Discrimator Model of the GAN
     Returns: Discriminator Network

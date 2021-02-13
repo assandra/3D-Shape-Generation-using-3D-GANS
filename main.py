@@ -5,7 +5,7 @@ Created on Sun Apr 26 11:27:18 2020
 @author: theaj
 """
 from keras.optimizers import Adam
-from Utils.models import build_Generator, build_Discriminator
+from Utils.models import build_generator, build_discriminator
 from Utils.image_preprocessing import get3DImages, saveFromVoxels
 from keras.layers import Input
 from keras.models import Model
@@ -13,16 +13,19 @@ from keras.callbacks import TensorBoard
 import tensorflow as tf
 import numpy as np
 from mpl_toolkits.mplot3d import Axes3D
-import time
+from time import time
 import os
 
 def write_log(callback, name, value, batch_no):
-    summary = tf.Summary()
-    summary_value = summary.value.add()
-    summary_value.simple_value = value
-    summary_value.tag = name
-    callback.writer.add_summary(summary, batch_no)
-    callback.writer.flush()
+    # TODO fix logs
+    # summary = tf.summary()
+    # summary_value = summary.value.add()
+    # summary_value.simple_value = value
+    # summary_value.tag = name
+    # callback.writer.add_summary(summary, batch_no)
+    # callback.writer.flush()
+
+    print("LOSSES")
 
 
 
@@ -38,7 +41,7 @@ def main():
     beta = 0.5
     batch_size = 1
     z_size = 200
-    epochs = 10
+    epochs = 100
     MODE = 'train'
     
     # Create the models
@@ -46,10 +49,10 @@ def main():
     gen_optimizer = Adam(lr=gen_learning_rate, beta_1=beta)
     dis_optimizer = Adam(lr=dis_learning_rate, beta_1=beta)
     
-    discriminator = build_Discriminator()
+    discriminator = build_discriminator()
     discriminator.compile(loss='binary_crossentropy', optimizer=dis_optimizer)
     
-    generator = build_Generator()
+    generator = build_generator()
     generator.compile(loss='binary_crossentropy', optimizer=gen_optimizer)
     
     discriminator.trainable = False
@@ -70,7 +73,7 @@ def main():
     print('Data loaded')
     
     # TensorBoard init
-    tensorboard = TensorBoard(log_dir='logs/{}'.format(time.time()))
+    tensorboard = TensorBoard(log_dir='logs/{}'.format(time()))
     tensorboard.set_model(generator)
     tensorboard.set_model(discriminator)
     
@@ -119,21 +122,21 @@ def main():
                 dis_losses.append(d_loss)
 
                 # Every 10th mini-batch , generate volumes and save them
-                if index % 10 == 0:
-                    z_sample2 = np.random.normal(0, 0.33, size=[batch_size, 1, 1, 1, z_size]).astype(np.float32)
-                    generated_volumes = generator.predict(z_sample2, verbose=3)
-                    for i, generated_volume in enumerate(generated_volumes[:5]):
-                        voxels = np.squeeze(generated_volume)
-                        voxels[voxels < 5] = 0.
-                        voxels[voxels >= 5] = 1.
-                        saveFromVoxels(voxels, "results/img_{}_{}_{}".format(epoch, index, i))
+                # if index % 10 == 0:
+                #     z_sample2 = np.random.normal(0, 0.33, size=[batch_size, 1, 1, 1, z_size]).astype(np.float32)
+                #     generated_volumes = generator.predict(z_sample2, verbose=3)
+                #     for i, generated_volume in enumerate(generated_volumes[:5]):
+                #         voxels = np.squeeze(generated_volume)
+                #         voxels[voxels < 5] = 0.
+                #         voxels[voxels >= 5] = 1.
+                #         saveFromVoxels(voxels, "results/img_{}_{}_{}".format(epoch, index, i))
 
             # Write losses to Tensorboard
             write_log(tensorboard, 'g_loss', np.mean(g_loss), epoch)
             write_log(tensorboard, 'd_loss', np.mean(d_loss), epoch)
 
-        generator.save_weights(os.path.join("models", "generator_weights.h5"))
-        discriminator.save_weights(os.path.join("models", "discriminator_weights.h5"))    
+        generator.save_weights(os.path.join("generated", "generator_weights.h5"))
+        discriminator.save_weights(os.path.join("generated", "discriminator_weights.h5"))    
     
     
     
